@@ -98,14 +98,19 @@
     }];
 }
 
--(NSMutableArray *)getUsersFromSeekingUsers:(NSArray *)seekingUsers{
-    NSMutableArray *userArray = [[NSMutableArray alloc] init];
-    for (PFObject *su in seekingUsers) {
-        NSLog(@"%@ added to userArray", [su objectId]);
-        [userArray addObject:[su objectForKey:@"user"]];
-    }
-    return userArray;
+-(PFUser *)getUserFromSeekingUser:(PFObject *) su{
+    return [su objectForKey:@"user"];
 }
+
+-(NSNumber *)getLatitudeOfUser:(PFUser *)user {
+    return [user objectForKey:@"latitude"];
+}
+
+-(NSNumber *)getLongitudeOfUser:(PFUser *)user {
+    return [user objectForKey:@"longitude"];
+}
+
+
 
 /**
 -(void)loadSeekingUsersWithCallback:(void (^)(NSMutableArray *))callback {

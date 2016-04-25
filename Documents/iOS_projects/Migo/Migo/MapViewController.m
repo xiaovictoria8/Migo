@@ -27,6 +27,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    //initialize map
+    self.map.delegate = self;
+    self.map.showsUserLocation = YES;
+    
     //initialize dataManager
     self.dataManager = [ParseDataManager sharedManager];
     
@@ -53,7 +57,17 @@
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:YES];
     NSLog(@"view appeared");
+    
+    //show seek button if user is neutral
+    if ([[self.dataManager getStatusOfUser:[PFUser currentUser]] isEqualToString:@"N"]) {
+        self.startGameButton.hidden = NO;
+    } else {
+        self.startGameButton.hidden = YES;
+    }
+
+    [self loadSeekingUsers];
 }
+
 
 //function called when a new location is found
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
@@ -73,6 +87,16 @@
     [self.locationManager startUpdatingLocation];
 }
 
+//functionality with the "seek game" button is tapped
+- (IBAction)buttonTapped:(UIButton *)sender
+{
+    //hide button
+    self.startGameButton.hidden = YES;
+    
+    //change status to seeking
+    [self.dataManager changeStatusToSeeking:[PFUser currentUser]];
+}
+
 //zooms map to last stored user location
 -(void) zoomMapToUser {
     MKCoordinateRegion region;
@@ -80,7 +104,25 @@
     region.span.longitudeDelta = 0.;
     region.center = self.loc.coordinate;
     [self.map setRegion:[self.map regionThatFits:region] animated:YES];
-    NSLog(@"Lat:%f, Long:%f", self.loc.coordinate.latitude, self.loc.coordinate.longitude);
+    NSLog(@" zooming in on Lat:%f, Long:%f", self.loc.coordinate.latitude, self.loc.coordinate.longitude);
+}
+
+//load pins for seeking users
+-(void)loadSeekingUsers {
+    [self.dataManager loadSeekingUsersWithCallback:^(NSMutableArray *suArray) {
+        for (PFObject *ob in suArray) {
+            PFUser *user = [self.dataManager getUserFromSeekingUser:ob];
+            NSLog(@"user %@", [user objectId]);
+            NSNumber *uLatitude = [self.dataManager getLatitudeOfUser:[PFUser currentUser]];
+            NSNumber * uLongitude = [self.dataManager getLongitudeOfUser:[PFUser currentUser]];
+            NSLog(@"Coordinates for pin are lat:%@ long:%@", uLatitude, uLongitude);
+            MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
+            annotation.coordinate = CLLocationCoordinate2DMake  ([uLatitude doubleValue], [uLongitude doubleValue]);
+            NSLog(@"Pin at lat:%f long:%f", annotation.coordinate.latitude, annotation.coordinate.longitude);
+            [self.map addAnnotation:annotation];
+        }
+        
+    }];
 }
 
 /***

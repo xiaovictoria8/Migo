@@ -24,11 +24,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Migo/MapViewController.m"
-            timestampString = "483245127.301359"
+            timestampString = "483247284.533633"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "191"
-            endingLineNumber = "191"
+            startingLineNumber = "233"
+            endingLineNumber = "233"
             landmarkName = "@implementation MapViewController"
             landmarkType = "3">
          </BreakpointContent>

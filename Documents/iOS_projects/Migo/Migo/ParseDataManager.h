@@ -30,6 +30,9 @@
 
 /** METHODS THAT DEAL WITH SEEKINGUSERS CLASS **/
 -(void)loadSeekingUsersWithCallback:(void (^)(NSMutableArray *))callback;
--(NSMutableArray *)getUsersFromSeekingUsers:(NSArray *)seekingUsers;
+-(PFUser *)getUserFromSeekingUser:(PFObject *) su;
+-(NSNumber *)getLatitudeOfUser:(PFUser *)user;
+-(NSNumber *)getLongitudeOfUser:(PFUser *)user;
+
 
 @end
