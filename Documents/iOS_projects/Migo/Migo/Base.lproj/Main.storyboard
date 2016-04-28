@@ -82,6 +82,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="avn-ki-wuf">
+                        <barButtonItem key="leftBarButtonItem" title="Stop seeking" id="FQO-cK-Bqp">
+                            <connections>
+                                <action selector="stopSeekingTapped:" destination="qBs-ct-9q9" id="owZ-KR-Rhp"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="Refresh" id="66A-Rk-Ixk">
                             <connections>
                                 <action selector="refreshButtonTapped:" destination="qBs-ct-9q9" id="Zx2-T4-dmE"/>
@@ -96,6 +101,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZX0-El-M35" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="986" y="302"/>
+        </scene>
+        <!--Blackjack View Controller-->
+        <scene sceneID="KVE-aJ-o51">
+            <objects>
+                <viewController id="CEg-eQ-6xh" customClass="BlackjackViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="uzg-H7-mtT"/>
+                        <viewControllerLayoutGuide type="bottom" id="ehc-lY-fQY"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ssz-ZH-HWC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="APQ-j7-uQB" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="986" y="1003"/>
         </scene>
     </scenes>
 </document>

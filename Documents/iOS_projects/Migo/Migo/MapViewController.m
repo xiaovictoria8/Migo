@@ -9,7 +9,6 @@
 #import "MapViewController.h"
 #import "ParseDataManager.h"
 #import "LogInViewController.h"
-#import <Parse/Parse.h>
 
 
 @interface MapViewController()
@@ -29,7 +28,7 @@
     
     //initialize map
     self.map.delegate = self;
-    self.map.showsUserLocation = YES;
+    self.map.showsUserLocation = NO;
     
     //initialize dataManager
     self.dataManager = [ParseDataManager sharedManager];
@@ -96,12 +95,16 @@
     //change status to seeking
     [self.dataManager changeStatusToSeeking:[PFUser currentUser]];
 }
+- (IBAction)stopSeekingTapped:(id)sender {
+    [[PFUser currentUser] setObject:@"N" forKey:@"status"];
+    self.startGameButton.hidden = NO;
+}
 
 //zooms map to last stored user location
 -(void) zoomMapToUser {
     MKCoordinateRegion region;
     region.span.latitudeDelta = 0.1;
-    region.span.longitudeDelta = 0.;
+    region.span.longitudeDelta = 0.1;
     region.center = self.loc.coordinate;
     [self.map setRegion:[self.map regionThatFits:region] animated:YES];
     NSLog(@" zooming in on Lat:%f, Long:%f", self.loc.coordinate.latitude, self.loc.coordinate.longitude);
@@ -112,9 +115,51 @@
     [self.dataManager loadSeekingUsersWithCallback:^(NSMutableArray *suArray) {
         for (PFObject *ob in suArray) {
             PFUser *user = [self.dataManager getUserFromSeekingUser:ob];
+            if (![user.objectId isEqualToString:[PFUser currentUser].objectId]) {
+                [self.dataManager drawPinForUser:user
+                                      sender:self];
+            }
+        }
+    }];
+}
+
+-(void)drawPins:(CLLocationCoordinate2D)co
+       WithUser:(PFObject *) user
+       withName:(NSString *) name {
+    //draws a pin for user at given coordinates - called by ParseDataManager
+    MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
+    annotation.coordinate = co;
+    annotation.title = name;
+    NSLog(@"Pin at lat:%f long:%f", annotation.coordinate.latitude, annotation.coordinate.longitude);
+    [self.map addAnnotation:annotation];
+}
+
+- (MKAnnotationView *) mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>) annotation {
+    //creates a button that segues to a blackjack game
+    MKPinAnnotationView *newAn = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"pLoc"];
+    newAn.canShowCallout = YES;
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [button setTintColor:[UIColor clearColor]];
+    [button setBackgroundImage:[UIImage imageNamed:@"chatIcon"] forState:UIControlStateNormal];
+    newAn.rightCalloutAccessoryView = button;
+    return newAn;
+}
+
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control
+{
+    //launch a new view upon touching the disclosure indicator
+    NSLog(@"disclosure button pressed");
+}
+
+/*
+//load pins for seeking users
+-(void)loadSeekingUsers {
+    [self.dataManager loadSeekingUsersWithCallback:^(NSMutableArray *suArray) {
+        for (PFObject *ob in suArray) {
+            PFUser *user = [self.dataManager getUserFromSeekingUser:ob];
             NSLog(@"user %@", [user objectId]);
-            NSNumber *uLatitude = [self.dataManager getLatitudeOfUser:[PFUser currentUser]];
-            NSNumber * uLongitude = [self.dataManager getLongitudeOfUser:[PFUser currentUser]];
+            NSNumber *uLatitude = [self.dataManager getLatitudeOfUser:user];
+            NSNumber * uLongitude = [self.dataManager getLongitudeOfUser:user];
             NSLog(@"Coordinates for pin are lat:%@ long:%@", uLatitude, uLongitude);
             MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
             annotation.coordinate = CLLocationCoordinate2DMake  ([uLatitude doubleValue], [uLongitude doubleValue]);
@@ -123,7 +168,7 @@
         }
         
     }];
-}
+} */
 
 /***
 //FUNCTIONS RELATED TO LOADING VC

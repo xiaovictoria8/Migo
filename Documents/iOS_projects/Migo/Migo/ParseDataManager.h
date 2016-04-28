@@ -10,6 +10,7 @@
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
 #import <Parse/Parse.h>
+#import "MapViewController.h"
 
 @interface ParseDataManager : NSObject
 
@@ -31,8 +32,8 @@
 /** METHODS THAT DEAL WITH SEEKINGUSERS CLASS **/
 -(void)loadSeekingUsersWithCallback:(void (^)(NSMutableArray *))callback;
 -(PFUser *)getUserFromSeekingUser:(PFObject *) su;
--(NSNumber *)getLatitudeOfUser:(PFUser *)user;
--(NSNumber *)getLongitudeOfUser:(PFUser *)user;
+-(void)drawPinForUser:(PFUser *)user
+               sender:(MapViewController *)vc;
 
 
 @end

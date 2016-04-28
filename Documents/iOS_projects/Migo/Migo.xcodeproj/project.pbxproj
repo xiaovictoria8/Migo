@@ -13,6 +13,7 @@
 		441FDD521CC9B05600AFA3DA /* MigoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 441FDD511CC9B05600AFA3DA /* MigoTests.m */; };
 		441FDD5D1CC9B05600AFA3DA /* MigoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 441FDD5C1CC9B05600AFA3DA /* MigoUITests.m */; };
 		441FDD6C1CC9B07300AFA3DA /* LogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 441FDD6B1CC9B07300AFA3DA /* LogInViewController.m */; };
+		444EE6691CCDDD7A00111989 /* chatIcon in Resources */ = {isa = PBXBuildFile; fileRef = 444EE6671CCDDC7F00111989 /* chatIcon */; };
 		44AB0FC61CCAFE5B00587600 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44AB0FC51CCAFE5B00587600 /* MapKit.framework */; };
 		44C892431CCC5AEE003E7F5B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44C892421CCC5AEE003E7F5B /* CoreLocation.framework */; };
 		44D27D1E1CCA75AE00F0D16C /* MapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D27D1D1CCA75AE00F0D16C /* MapViewController.m */; };
@@ -20,6 +21,7 @@
 		44D27D231CCA76D600F0D16C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D27D221CCA76D600F0D16C /* main.m */; };
 		44D27D261CCA771B00F0D16C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D27D251CCA771B00F0D16C /* AppDelegate.m */; };
 		44D27D281CCA869900F0D16C /* LogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 441FDD6B1CC9B07300AFA3DA /* LogInViewController.m */; };
+		44DDAD381CD2971900190F7B /* BlackjackViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DDAD371CD2971900190F7B /* BlackjackViewController.m */; };
 		9DA4D9C6E4E023B0C772694B /* libPods-Migo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE3E0DB77A253A6744C4131 /* libPods-Migo.a */; };
 /* End PBXBuildFile section */
 
@@ -54,6 +56,7 @@
 		441FDD5E1CC9B05600AFA3DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		441FDD6A1CC9B07300AFA3DA /* LogInViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogInViewController.h; sourceTree = "<group>"; };
 		441FDD6B1CC9B07300AFA3DA /* LogInViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogInViewController.m; sourceTree = "<group>"; };
+		444EE6671CCDDC7F00111989 /* chatIcon */ = {isa = PBXFileReference; lastKnownFileType = file; path = chatIcon; sourceTree = SOURCE_ROOT; };
 		44AB0FC51CCAFE5B00587600 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		44C892421CCC5AEE003E7F5B /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		44D27D1C1CCA75AE00F0D16C /* MapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapViewController.h; sourceTree = "<group>"; };
@@ -63,6 +66,8 @@
 		44D27D221CCA76D600F0D16C /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		44D27D241CCA771B00F0D16C /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		44D27D251CCA771B00F0D16C /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		44DDAD361CD2971900190F7B /* BlackjackViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlackjackViewController.h; sourceTree = "<group>"; };
+		44DDAD371CD2971900190F7B /* BlackjackViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlackjackViewController.m; sourceTree = "<group>"; };
 		6762E8DF6D83B720EDC45DF6 /* Pods-Migo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Migo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Migo/Pods-Migo.debug.xcconfig"; sourceTree = "<group>"; };
 		6EE3E0DB77A253A6744C4131 /* libPods-Migo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Migo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0F8657E69585BE5C6CB9CD4 /* Pods-Migo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Migo.release.xcconfig"; path = "Pods/Target Support Files/Pods-Migo/Pods-Migo.release.xcconfig"; sourceTree = "<group>"; };
@@ -130,6 +135,7 @@
 		441FDD361CC9B05600AFA3DA /* Migo */ = {
 			isa = PBXGroup;
 			children = (
+				444EE6671CCDDC7F00111989 /* chatIcon */,
 				44D27D241CCA771B00F0D16C /* AppDelegate.h */,
 				44D27D251CCA771B00F0D16C /* AppDelegate.m */,
 				44D27D221CCA76D600F0D16C /* main.m */,
@@ -140,6 +146,8 @@
 				441FDD431CC9B05600AFA3DA /* Assets.xcassets */,
 				441FDD451CC9B05600AFA3DA /* LaunchScreen.storyboard */,
 				441FDD481CC9B05600AFA3DA /* Info.plist */,
+				44DDAD361CD2971900190F7B /* BlackjackViewController.h */,
+				44DDAD371CD2971900190F7B /* BlackjackViewController.m */,
 			);
 			path = Migo;
 			sourceTree = "<group>";
@@ -305,6 +313,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				444EE6691CCDDD7A00111989 /* chatIcon in Resources */,
 				441FDD471CC9B05600AFA3DA /* LaunchScreen.storyboard in Resources */,
 				441FDD441CC9B05600AFA3DA /* Assets.xcassets in Resources */,
 				441FDD421CC9B05600AFA3DA /* Main.storyboard in Resources */,
@@ -381,6 +390,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				441FDD6C1CC9B07300AFA3DA /* LogInViewController.m in Sources */,
+				44DDAD381CD2971900190F7B /* BlackjackViewController.m in Sources */,
 				44D27D211CCA764700F0D16C /* ParseDataManager.m in Sources */,
 				44D27D231CCA76D600F0D16C /* main.m in Sources */,
 				44D27D1E1CCA75AE00F0D16C /* MapViewController.m in Sources */,

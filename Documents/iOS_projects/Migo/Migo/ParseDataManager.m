@@ -7,8 +7,10 @@
 //
 
 #import "ParseDataManager.h"
+#import "MapViewController.h"
 #import <Foundation/Foundation.h>
 #import <ParseFacebookUtilsV4/PFFacebookUtils.h>
+#import <MapKit/MapKit.h>
 
 #import <Parse/Parse.h>
 
@@ -29,7 +31,7 @@
 /** METHODS THAT HAVE TO DO WITH LOGGING INTO FB **/
 
 - (BOOL)isUserLoggedIn {
-    return [[PFUser currentUser] isAuthenticated];
+    return [PFUser currentUser] != nil;
 }
 
 -(void) fbLoginWithToken: (FBSDKAccessToken *) token
@@ -42,17 +44,33 @@
                                                         //NSLog(@"User signed up and logged in through Facebook!");
                                                         
                                                         //setup new user
-                                                        [user setObject:@0 forKey:@"wins"];
-                                                        [user setObject:@0 forKey:@"losses"];
-                                                        [user setObject:@0 forKey:@"ties"];
-                                                        [user setObject:@"N" forKey:@"status"];
-                                                        [user save];
+                                                        [self setUpNewUser:user];
                                                         [[vc presentingViewController] dismissViewControllerAnimated:YES completion:nil];
                                                     } else {
                                                        // NSLog(@"User logged in through Facebook!");
                                                         [[vc presentingViewController] dismissViewControllerAnimated:YES completion:nil];
                                                     }
                                                 }];
+}
+
+-(void)setUpNewUser:(PFUser *) user {
+    [user setObject:@0 forKey:@"wins"];
+    [user setObject:@0 forKey:@"losses"];
+    [user setObject:@0 forKey:@"ties"];
+    [user setObject:@"N" forKey:@"status"];
+    
+    FBSDKGraphRequest *request = [[FBSDKGraphRequest alloc] initWithGraphPath:@"me" parameters:@{@"fields": @"name"}];
+    [request startWithCompletionHandler:^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
+        if (!error) {
+            NSDictionary *data = (NSDictionary *)result;
+            NSLog(@"fb request is called");
+            NSLog(@"name:%@", data[@"name"]);
+            [user setObject:data[@"name"] forKey:@"fbName"];
+        } else {
+            NSLog(@"%@", error);
+        }
+        [user save];
+    }];
 }
 
 -(void) fbLogout {
@@ -63,25 +81,30 @@
 /** METHODS THAT HAVE TO DEAL WITH USERS **/
 
 -(void)changeStatusToSeeking:(PFUser *) user {
-    //change user's status
-    [user setObject:@"S" forKey:@"status"];
-    [user save];
-    
-    //add user to "seekingUsers" database
-    PFObject *sUser = [PFObject objectWithClassName:@"SeekingUsers"];
-    [sUser setObject:[PFUser currentUser] forKey:@"user"];
-    [sUser save];
-    //NSLog(@"%@ logged as seeking game", [user objectId]);
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    dispatch_async(backgroundQueue, ^{
+        //change user's status
+        [user setObject:@"S" forKey:@"status"];
+        [user save];
+        
+        //add user to "seekingUsers" database
+        PFObject *sUser = [PFObject objectWithClassName:@"SeekingUsers"];
+        [sUser setObject:[PFUser currentUser] forKey:@"user"];
+        [sUser save];
+        //NSLog(@"%@ logged as seeking game", [user objectId]);
+    });
 }
 
 -(void)changeLocationOfUser:(PFUser *)user
                WithLatitude:(NSNumber *)latitude
               WithLongitude:(NSNumber *)longitude {
     //store current location
-    [user setObject:latitude forKey:@"latitude"];
-    [user setObject:longitude forKey:@"longitude"];
-    //NSLog(@"%@ latitude:%@, longitude:%@", [user objectId], latitude, longitude);
-    [user save];
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    dispatch_async(backgroundQueue, ^{
+        [user setObject:latitude forKey:@"latitude"];
+        [user setObject:longitude forKey:@"longitude"];
+        [user save];
+    });
 }
 
 -(NSString *)getStatusOfUser:(PFUser *) user {
@@ -102,14 +125,22 @@
     return [su objectForKey:@"user"];
 }
 
--(NSNumber *)getLatitudeOfUser:(PFUser *)user {
-    return [user objectForKey:@"latitude"];
-}
 
--(NSNumber *)getLongitudeOfUser:(PFUser *)user {
-    return [user objectForKey:@"longitude"];
+//draws a pin for all seeking users on the sender VC
+-(void)drawPinForUser:(PFUser *)user
+                                 sender:(MapViewController *)vc {
+    __block CLLocationCoordinate2D co;
+    PFQuery *query = [PFQuery queryWithClassName:@"_User"];
+    [query getObjectInBackgroundWithId:user.objectId block:^(PFObject *userOb, NSError *error) {
+        NSLog(@"getCoordinate called with user %@", [user objectId]);
+        NSLog(@"latitude: %@", [userOb objectForKey:@"latitude"]);
+        NSLog(@"longitude: %@", [userOb objectForKey:@"longitude"]);
+        co = CLLocationCoordinate2DMake  ([[userOb objectForKey:@"latitude"] doubleValue], [[userOb objectForKey:@"longitude"] doubleValue]);
+        [vc drawPins:co
+            WithUser:userOb
+            withName:[userOb objectForKey:@"fbName"]];
+    }];
 }
-
 
 
 /**
