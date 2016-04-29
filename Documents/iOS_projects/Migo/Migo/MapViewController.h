@@ -16,7 +16,10 @@
 
 
 -(void)drawPins:(CLLocationCoordinate2D)co
-       WithUser:(PFObject *) user
+       WithUser:(NSString *) userId
        withName:(NSString *) name;
+-(void)segueToGameBoardWithHost:(PFUser *)host
+                      WithGuest:(PFUser *)guest;
+-(void)segueToGameBoardWithGame:(PFObject *) gOb;
 
 @end

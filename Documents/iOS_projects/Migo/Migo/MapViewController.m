@@ -9,6 +9,7 @@
 #import "MapViewController.h"
 #import "ParseDataManager.h"
 #import "LogInViewController.h"
+#import "BlackjackViewController.h"
 
 
 @interface MapViewController()
@@ -58,10 +59,16 @@
     NSLog(@"view appeared");
     
     //show seek button if user is neutral
-    if ([[self.dataManager getStatusOfUser:[PFUser currentUser]] isEqualToString:@"N"]) {
+    NSString *status = [self.dataManager getStatusOfUser:[PFUser currentUser]];
+    if ([status isEqualToString:@"N"]) {
         self.startGameButton.hidden = NO;
-    } else {
+    } else if ([status isEqualToString:@"S"]){
         self.startGameButton.hidden = YES;
+        [self.dataManager userRequestedInGameCheck:[PFUser currentUser]
+                                            Sender:self];
+    } else {
+        [self.dataManager segueToGameForUser:[PFUser currentUser]
+                                      Sender:self];
     }
 
     [self loadSeekingUsers];
@@ -124,15 +131,17 @@
 }
 
 -(void)drawPins:(CLLocationCoordinate2D)co
-       WithUser:(PFObject *) user
+       WithUser:(NSString *) userId
        withName:(NSString *) name {
     //draws a pin for user at given coordinates - called by ParseDataManager
     MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
     annotation.coordinate = co;
     annotation.title = name;
+    annotation.subtitle = userId;
     NSLog(@"Pin at lat:%f long:%f", annotation.coordinate.latitude, annotation.coordinate.longitude);
     [self.map addAnnotation:annotation];
 }
+
 
 - (MKAnnotationView *) mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>) annotation {
     //creates a button that segues to a blackjack game
@@ -147,156 +156,37 @@
 
 - (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control
 {
-    //launch a new view upon touching the disclosure indicator
-    NSLog(@"disclosure button pressed");
+    //when button is tapped, create new viewcontroller and present it
+    PFQuery *query = [PFQuery queryWithClassName:@"_User"];
+    [query getObjectInBackgroundWithId:view.annotation.subtitle
+                                 block:^(PFObject *user, NSError *error) {
+                                        //present new BlackjavkViewController for game
+                                     [self segueToGameBoardWithHost:[PFUser currentUser] WithGuest:user];
+
+                                 }];
 }
 
-/*
-//load pins for seeking users
--(void)loadSeekingUsers {
-    [self.dataManager loadSeekingUsersWithCallback:^(NSMutableArray *suArray) {
-        for (PFObject *ob in suArray) {
-            PFUser *user = [self.dataManager getUserFromSeekingUser:ob];
-            NSLog(@"user %@", [user objectId]);
-            NSNumber *uLatitude = [self.dataManager getLatitudeOfUser:user];
-            NSNumber * uLongitude = [self.dataManager getLongitudeOfUser:user];
-            NSLog(@"Coordinates for pin are lat:%@ long:%@", uLatitude, uLongitude);
-            MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
-            annotation.coordinate = CLLocationCoordinate2DMake  ([uLatitude doubleValue], [uLongitude doubleValue]);
-            NSLog(@"Pin at lat:%f long:%f", annotation.coordinate.latitude, annotation.coordinate.longitude);
-            [self.map addAnnotation:annotation];
-        }
-        
-    }];
-} */
-
-/***
-//FUNCTIONS RELATED TO LOADING VC
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    
-    //initialize managers
-    self.dataManager = [ParseDataManager sharedManager];
-    self.locationManager = [[CLLocationManager alloc] init];
-    
-    //setup location manager
-    if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
-        [self.locationManager requestAlwaysAuthorization];
-    }
-    self.locationManager.delegate = self;
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
-    [self.locationManager startUpdatingLocation];
-    NSLog(@"eh");
-    
-    //check login
-    if (![self.dataManager isUserLoggedIn]) {
-        UIStoryboard *storyboard = self.storyboard;
-        LogInViewController * livc = [storyboard instantiateViewControllerWithIdentifier:@"LogInViewController"];
-        UINavigationController *livcNavController = [[UINavigationController alloc] initWithRootViewController:livc];
-        [self.navigationController presentViewController:livcNavController animated:YES completion:nil];
-    }
-    
-    //show seek button if user is neutral
-    if ([[self.dataManager getStatusOfUser:[PFUser currentUser]] isEqualToString:@"N"]) {
-        self.startGameButton.hidden = NO;
-    } else {
-        self.startGameButton.hidden = YES;
-    }
-    
-    //setup map
-    self.map.delegate = self;
-    self.map.showsUserLocation = NO;
-    [self zoomMapToUser];
-    
-    Code for deleting a user
-     PFQuery *query = [PFQuery queryWithClassName:@"seekingUsers"];
-     [query whereKey:@"user" equalTo:[PFUser currentUser]];
-     [query getFirstObjectInBackgroundWithBlock:^(PFObject *user, NSError *error) {
-     if (error) {
-     NSLog(@"getting object error: %@", error);
-     }
-     [user deleteInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
-     if (succeeded && !error) {
-     NSLog(@"Image deleted from Parse");
-     } else {
-     NSLog(@"deletion error: %@", error);
-     }
-     }];
-     }];]
-    
-    
+-(void)segueToGameBoardWithHost:(PFUser *)host
+                      WithGuest:(PFUser *)guest{
+    UIStoryboard *storyboard = self.storyboard;
+    BlackjackViewController * bjvc = [storyboard instantiateViewControllerWithIdentifier:@"BlackjackViewController"];
+    UINavigationController *livcNavController = [[UINavigationController alloc] initWithRootViewController:bjvc];
+    bjvc.host = host;
+    bjvc.guest = guest;
+    [self.navigationController presentViewController:livcNavController animated:YES completion:nil];
 }
 
-// FUNCTIONS RELATED TO THE MAP DISPLAY
--(void)loadSeekingUsers {
-    [self.dataManager loadSeekingUsersWithCallback:^(NSMutableArray *suArray) {
-        for (PFObject *ob in suArray) {
-            //add pin for each seeking user
-            PFUser *user = [ob objectForKey:@"user"];
-            double uLatitude = -73;
-            double uLongitude = 40;
-            MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
-            annotation.coordinate = CLLocationCoordinate2DMake  (uLatitude, uLongitude);
-            [self.map addAnnotation:annotation];
-            MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(annotation.coordinate, 200, 200);
-            [self.map setRegion:[self.map regionThatFits:region] animated:YES];
-            [self.map setRegion:[self.map regionThatFits:region] animated:YES];
-            NSLog(@"Pin added for %@", [user objectId]);
-        }
-        
-    }];
+-(void)segueToGameBoardWithGame:(PFObject *) gOb {
+    NSLog(@"segue to game board with game");
+    UIStoryboard *storyboard = self.storyboard;
+    BlackjackViewController * bjvc = [storyboard instantiateViewControllerWithIdentifier:@"BlackjackViewController"];
+    UINavigationController *livcNavController = [[UINavigationController alloc] initWithRootViewController:bjvc];
+    bjvc.game = gOb;
+    bjvc.host = [gOb objectForKey:@"host"];
+    bjvc.guest = [gOb objectForKey:@"guest"];
+    NSLog(@"game %@, host %@, guest %@", bjvc.game, bjvc.host, bjvc.guest);
+    [self.navigationController presentViewController:livcNavController animated:YES completion:nil];
 }
 
-//TODO: Update location of user once in a while
-//once location has been updated start displaying map
-- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
-    self.loc = [locations firstObject];
-    NSLog(@"Current Lat: %f", self.loc.coordinate.latitude);
-    NSLog(@"Current Long: %f", self.loc.coordinate.longitude);
-    [self.locationManager stopUpdatingLocation];
-    
-    [self zoomMapToUser];
-}
-
-//zoom in onto user location
--(void) zoomMapToUser {
-    MKCoordinateRegion region;
-    MKCoordinateSpan span;
-    span.latitudeDelta = 0.1;
-    span.longitudeDelta = 0.;
-    region.span = span;
-    CLLocationCoordinate2D coordinates = CLLocationCoordinate2DMake([[[PFUser currentUser] objectForKey:@"latitude"] doubleValue], [[[PFUser currentUser] objectForKey:@"longitude"] doubleValue]);
-    region.center = coordinates;
-    [self.map setRegion:[self.map regionThatFits:region] animated:YES];
-    NSLog(@"Lat:%f, Long:%f", coordinates.latitude, coordinates.longitude);
-}
-
-
-//when button tapped, user begins seeking game
-- (IBAction)buttonTapped:(UIButton *)sender
-{
-    //hide button
-    self.startGameButton.hidden = YES;
-    
-    //change status to seeking
-    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    dispatch_async(backgroundQueue, ^{
-    [self.dataManager changeStatusToSeeking:[PFUser currentUser]];
-    [self.dataManager changeLocationOfUser:[PFUser currentUser]
-                              WithLatitude:[NSNumber numberWithDouble:self.loc.coordinate.latitude]
-                             WithLongitude:[NSNumber numberWithDouble:self.loc.coordinate.longitude]];
-    });
-}
-- (IBAction)refreshButtonTapped:(id)sender {
-    [self.locationManager startUpdatingLocation];
-    [self loadSeekingUsers];
-}
-
-//function helps fit the map to the screen
--(void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
-    self.map.frame = self.view.bounds;
-}
-***/
 
 @end

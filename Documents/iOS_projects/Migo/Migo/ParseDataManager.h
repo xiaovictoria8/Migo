@@ -29,6 +29,16 @@
                WithLatitude:(NSNumber *) latitude
               WithLongitude:(NSNumber *)longitude;
 
+/** METHODS THAT DEAL WITH USERS AND GAMES **/
+-(void) addUser:(PFUser *) user
+         ToGame:(PFObject *) game;
+-(void)addRequestingUser:(PFUser *) user
+                 ForGame:(PFObject *) game;
+-(void)userRequestedInGameCheck:(PFUser *) user
+                         Sender:(MapViewController *) vc;
+-(void)segueToGameForUser:(PFUser *)user
+                  Sender:(MapViewController *)vc;
+
 /** METHODS THAT DEAL WITH SEEKINGUSERS CLASS **/
 -(void)loadSeekingUsersWithCallback:(void (^)(NSMutableArray *))callback;
 -(PFUser *)getUserFromSeekingUser:(PFObject *) su;

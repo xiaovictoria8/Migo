@@ -11,7 +11,6 @@
 #import <Foundation/Foundation.h>
 #import <ParseFacebookUtilsV4/PFFacebookUtils.h>
 #import <MapKit/MapKit.h>
-
 #import <Parse/Parse.h>
 
 @interface ParseDataManager()
@@ -91,7 +90,6 @@
         PFObject *sUser = [PFObject objectWithClassName:@"SeekingUsers"];
         [sUser setObject:[PFUser currentUser] forKey:@"user"];
         [sUser save];
-        //NSLog(@"%@ logged as seeking game", [user objectId]);
     });
 }
 
@@ -109,6 +107,86 @@
 
 -(NSString *)getStatusOfUser:(PFUser *) user {
     return [user objectForKey:@"status"];
+}
+
+/** METHODS THAT DEAL WITH USERS AND GAMES **/
+-(void) addUser:(PFUser *) user
+         ToGame:(PFObject *) game {
+    [user setObject:@"G" forKey:@"status"];
+    [user saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+        if (succeeded) {
+            NSLog(@"Change user sTATUS");
+        } else {
+            NSLog(@"%@ status change ", error);
+        }
+    }];
+    
+    //delete users from SeekingUsers table
+    PFQuery *query = [PFQuery queryWithClassName:@"SeekingUsers"];
+    [query whereKey:@"user" equalTo:user];
+    [query getFirstObjectInBackgroundWithBlock:^(PFObject * _Nullable object, NSError * _Nullable error) {
+        if (!error) {
+            //[object deleteInBackground];
+        }
+    }];
+    
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(backgroundQueue, ^{
+        NSLog(@"Game ID: %@", [game objectId]);
+        [user setObject:[game objectId] forKey:@"inGame"];
+        [user saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+            if (succeeded) {
+                // The object has been saved.
+            } else {
+                NSLog(@"%@ user", error);
+            }
+        }];
+    });
+}
+
+-(void)addRequestingUser:(PFUser *) guest
+                 ForGame:(PFObject *) game {
+    //add user to "RequestingUsers" database
+    PFObject *rUser = [PFObject objectWithClassName:@"RequestingUsers"];
+    [rUser setObject:guest forKey:@"user"];
+    [rUser setObject:game forKey:@"game"];
+    [rUser saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+        if (succeeded) {
+            // The object has been saved.
+        } else {
+            NSLog(@"%@ user", error);
+        }
+    }];
+}
+
+-(void)userRequestedInGameCheck:(PFUser *) user
+                         Sender:(MapViewController *) vc{
+    NSLog(@"userRequestInGameCheck called");
+    [[PFQuery queryWithClassName:@"RequestingUsers"] findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
+        if (!error) {
+            for (PFObject *ob in objects) {
+                //is user is requested, add user to game
+                if ([[[ob objectForKey:@"user"] objectId] isEqualToString:[user objectId]]) {
+                    NSLog(@"%@ isEqualTo: %@", [[ob objectForKey:@"user"] objectId], [user objectId]);
+                    [self addUser:user
+                           ToGame:[ob objectForKey:@"game"]];
+                    NSLog(@"segueToGameBoard");
+                    [vc segueToGameBoardWithHost:nil WithGuest:user];
+                    
+                }
+            }
+        }
+        
+    }];
+}
+
+-(void)segueToGameForUser:(PFUser *)user
+                  Sender:(MapViewController *)vc{
+    PFQuery *query = [PFQuery queryWithClassName:@"Game"];
+    [query getObjectInBackgroundWithId:[user objectForKey:@"inGame"] block:^(PFObject *game, NSError *error) {
+        NSLog(@"segue to game board with game called on %@", game);
+        [vc segueToGameBoardWithGame:game];
+    }];
 }
 
 /** METHODS THAT DEAL WITH SEEKINGUSERS CLASS **/
@@ -137,31 +215,10 @@
         NSLog(@"longitude: %@", [userOb objectForKey:@"longitude"]);
         co = CLLocationCoordinate2DMake  ([[userOb objectForKey:@"latitude"] doubleValue], [[userOb objectForKey:@"longitude"] doubleValue]);
         [vc drawPins:co
-            WithUser:userOb
+            WithUser:[userOb objectId]
             withName:[userOb objectForKey:@"fbName"]];
     }];
 }
 
-
-/**
--(void)loadSeekingUsersWithCallback:(void (^)(NSMutableArray *))callback {
-    [[PFQuery queryWithClassName:@"SeekingUsers"] findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
-        if (!error) {
-            
-            NSLog(@"SeekingUsers array found");
-            NSMutableArray *userArray = [[NSMutableArray alloc] init];
-            for (PFObject *ob in objects) {
-                NSLog(@"%@ added to userArray", [ob objectId]);
-                [userArray addObject:[ob objectForKey:@"user"]];
-            }
-            
-            for (PFObject *ob in userArray) {
-                NSLog(@"%@ found in userArray", [ob objectId]);
-            }
-            
-            callback([userArray mutableCopy]); 
-        }
-    }];
-} **/
      
 @end
